@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: Pedro Braghin
+Package-Name: com.br.src
+Main-Class: com.br.src.main.Main
