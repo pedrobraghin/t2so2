@@ -69,8 +69,10 @@ public class Server implements Runnable {
         } catch (IOException e) {
             Log.saveLog(e.getMessage());
         } finally {
-            synchronized (server) {
-                server.notifyAll();
+            if(server != null ) {
+                synchronized (server) {
+                    server.notifyAll();
+                }
             }
         }
     }
