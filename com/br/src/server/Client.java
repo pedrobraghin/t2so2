@@ -11,6 +11,8 @@ import java.net.SocketException;
 import com.br.src.logger.Log;
 import com.br.src.utils.DateTime;
 
+import com.br.src.security.RSA;
+
 public class Client implements Runnable {
 
     private boolean isConnected;
@@ -22,17 +24,20 @@ public class Client implements Runnable {
     private PrintStream sentMessageToServer;
     private BufferedReader receiveMessageFromServer;
     private Stream stream;
+    private RSA rsa;
 
     public Client(String host, int port, Stream stream) {
         this.stream = stream;
         this.ip = host;
         this.port = port;
         this.isConnected = false;
+        this.rsa = new RSA();
     }
 
     @Override
     public void run() {
         String message;
+        String descryptedMessage;
         try {
             isConnected = true;
             client = new Socket(ip, port);
@@ -41,7 +46,8 @@ public class Client implements Runnable {
             receiveMessageFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             while (isConnected && (message = receiveMessageFromServer.readLine()) != null) {
-                stream.println(message);
+                descryptedMessage = rsa.decrypt(message);
+                stream.println(descryptedMessage);
             }
         } catch (SocketException e) {
             Log.saveLog("Error on Client Socket: " + e.getMessage());
@@ -64,7 +70,8 @@ public class Client implements Runnable {
 
     public void sendMessage(String message) {
         try {
-            sentMessageToServer.println(message);
+            String encryptedMessage = rsa.encrypt(message);
+            sentMessageToServer.println(encryptedMessage);
             if( message.startsWith("/exit")) {
                 closeConnection();
             }

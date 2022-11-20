@@ -357,7 +357,7 @@ public class Window extends JFrame {
                 }
 
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Insira somente valores numéricos no campo \"porta\".", "Porta Inválida", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Insira somente valores numéricos no campo \"Port\".", "Porta Inválida", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             this.port = this.DEFAULT_PORT;

@@ -116,7 +116,7 @@ public class Server implements Runnable {
             try {
                 sendMessageToClient = new PrintStream(client.getOutputStream(), true);
                 receiveMessageFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                sendMessageToClient.println(formatMessage("[Servidor] Conexão estabelecida."));
+                sendMessageToClient("[Servidor] Conexão estabelecida.");
 
                 System.out.println("Usuário " + ID + " se conectou.");
                 loginClient();
@@ -131,24 +131,16 @@ public class Server implements Runnable {
                         String[] privateMessage = clientMessage.split(" ", 3);
                         boolean isMessageSent = false;
                         if (privateMessage.length != 3) {
-                            sendMessageToClient.println(
-                                    formatMessage(
-                                            "[Servidor] Para enviar uma mensagem privada siga o seguinte formato: /private <nickname do receptor> <mensagem>."));
+                            sendMessageToClient("[Servidor] Para enviar uma mensagem privada siga o seguinte formato: /private <nickname do receptor> <mensagem>.");
                         } else {
                             if (privateMessage[1].equals(nickname)) {
-                                sendMessageToClient.println(
-                                        formatMessage(
-                                                "[Servidor] Não é possível enviar uma mensagem para você mesmo."));
+                                sendMessageToClient("[Servidor] Não é possível enviar uma mensagem para você mesmo.");
                             } else {
                                 isMessageSent = sendPrivateMessage(privateMessage[2], nickname, privateMessage[1]);
                                 if (isMessageSent) {
-                                    sendMessageToClient.println(
-                                            formatMessage("[Servidor] Mensagem enviada para " + privateMessage[1]));
+                                    sendMessageToClient("[Servidor] Mensagem enviada para " + privateMessage[1]);
                                 } else {
-                                    sendMessageToClient.println(
-                                            formatMessage("[Servidor] Não foi possível enviar mensagem para "
-                                                    + privateMessage[1]
-                                                    + ". Usuário não encontrado!"));
+                                    sendMessageToClient("[Servidor] Não foi possível enviar mensagem para " + privateMessage[1] + ". Usuário não encontrado!");
                                 }
                             }
                         }
@@ -173,11 +165,18 @@ public class Server implements Runnable {
             }
         }
 
+        private void sendMessageToClient(String message) {
+            sendMessageToClient.println(rsa.encrypt(formatMessage(message)));
+        }
+
+        private void sendPrivateMessageToClient(String message, String recipient) {
+            sendMessageToClient.println(rsa.encrypt(formatPrivateMessage(message, recipient)));
+        }
+
         private void loginClient() {
             boolean isValidNickname = true;
             try {
-                sendMessageToClient.println(
-                        formatMessage("[Servidor] Informe um nickname para se conectar ao chat: "));
+                sendMessageToClient("[Servidor] Informe um nickname para se conectar ao chat: ");
 
                 nickname = receiveMessageFromClient.readLine();
                 isValidNickname = validateNickname(nickname, ID);
@@ -187,22 +186,16 @@ public class Server implements Runnable {
                     return;
                 }
                 while (!isValidNickname) {
-                    sendMessageToClient.println(
-                            formatMessage("[Servidor] Este nickname já está em uso, escolha outra: "));
+                    sendMessageToClient("[Servidor] Este nickname já está em uso, escolha outra: ");
 
                     nickname = receiveMessageFromClient.readLine();
                     isValidNickname = validateNickname(nickname, ID);
                 }
-                sendMessageToClient.println(
-                        formatMessage("[Servidor] Seja bem-vindo(a) ao Chat " + nickname));
+                sendMessageToClient("[Servidor] Seja bem-vindo(a) ao Chat " + nickname);
             } catch (IOException e) {
                 Log.saveLog(e.getMessage());
             } catch (NullPointerException e) {
             }
-        }
-
-        public void sendMessage(String message) {
-            sendMessageToClient.println(rsa.encrypt(message));
         }
 
         public String readMessage(String message) {
@@ -220,7 +213,7 @@ public class Server implements Runnable {
         private void broadcast(String message, String id) {
             for (ConnectionHandler conn : allConn) {
                 if (conn != null && (!conn.getId().equals(id))) {
-                    conn.sendMessage(formatMessage(message));
+                    conn.sendMessageToClient(message);
                 }
             }
         }
@@ -230,7 +223,7 @@ public class Server implements Runnable {
             for (ConnectionHandler conn : allConn) {
                 if (conn != null) {
                     if (conn.getNickname().equals(recipient)) {
-                        conn.sendMessage(formatPrivateMessage(message, recipient));
+                        conn.sendPrivateMessageToClient(message, recipient);
                         isMessageSent = true;
                         break;
                     }
@@ -272,7 +265,7 @@ public class Server implements Runnable {
 
         public void closeConnection() {
             int index = 0;
-            sendMessageToClient.println(formatMessage("[Servidor] Conexão finalizada."));
+            sendMessageToClient("[Servidor] Conexão finalizada.");
             for (ConnectionHandler conn : allConn) {
                 if (conn.ID.equals(ID)) {
                     index = allConn.indexOf(conn);
