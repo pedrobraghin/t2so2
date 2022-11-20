@@ -21,21 +21,40 @@ public class RSA {
     private static final String PATH_PRIVATE_KEY = "./keys/private.key";
     private static final String PATH_PUBLIC_KEY = "./keys/public.key";
     private static final String ALGORITHM = "RSA";
+    private static final String TOKEN_SEPARATOR = "--TOKEN--";
 
     public String encrypt(String message) {
-        byte[] cipherText = null;
         try {
             File publicKeyFile = new File(PATH_PUBLIC_KEY);
+            KeyFactory keyFactory;
+            EncodedKeySpec publicKeySpec;
+            PublicKey publicKey;
+            Cipher cipher;
+
+            byte[] cipherText = null;
+            String messageTokenyzed = "";
             byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-
-            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            String[] tokens = message.split(" ");
+            keyFactory = KeyFactory.getInstance(ALGORITHM);
+            publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            publicKey = keyFactory.generatePublic(publicKeySpec);
+            cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            cipherText = cipher.doFinal(message.getBytes());
-            return encode(cipherText);
+            
+            // don't allow to add a last token separator at the end of the message
+            int count = 0;
+
+            for (String token : tokens) {
+                cipherText = cipher.doFinal(token.getBytes());
+                if(count < (tokens.length - 1)) {
+                    messageTokenyzed += encode(cipherText) + TOKEN_SEPARATOR;
+                } else {
+                    messageTokenyzed += encode(cipherText);
+                }
+                count++;
+            }
+
+            return messageTokenyzed;
         } catch (Exception e) {
             e.printStackTrace();
             Log.saveLog("Error while encrypting: " + e.getMessage());
@@ -44,24 +63,35 @@ public class RSA {
         return "Erro ao encriptar menssagem!";
     }
 
-    private String encode(byte[] data) throws Exception{
-        return Base64.getUrlEncoder().encodeToString(data);
-    }
-
     public String decrypt(String encryptedMessage) {
         try {
-            byte[] encryptedBytes = decode(encryptedMessage);
             File privateKeyFile = new File(PATH_PRIVATE_KEY);
             byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
-
+            byte[] encryptedBytes;
+            byte[] decryptedBytes;
+            Cipher cipher;
             KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
             EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            String[] tokens = encryptedMessage.split(TOKEN_SEPARATOR);
+            String plainText = "";
 
-            byte[] decryptedText = cipher.doFinal(encryptedBytes);
-            String plainText = new String(decryptedText);
+            keyFactory = KeyFactory.getInstance(ALGORITHM);
+            privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            privateKey = keyFactory.generatePrivate(privateKeySpec);
+            
+            int count = 0;
+            for(String token : tokens) {  
+                cipher = Cipher.getInstance(ALGORITHM);
+                cipher.init(Cipher.DECRYPT_MODE, privateKey);
+                encryptedBytes = decode(token);
+                decryptedBytes = cipher.doFinal(encryptedBytes);
+                if(count < (tokens.length -1)) {
+                    plainText += new String(decryptedBytes) + " ";
+                } else {
+                    plainText += new String(decryptedBytes);
+                }
+            }
             return plainText;
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,15 +100,19 @@ public class RSA {
         return "Erro ao desencriptar menssagem!";
     }
 
-    private byte[] decode(String data) throws Exception{
+    private String encode(byte[] data) throws Exception {
+        return Base64.getUrlEncoder().encodeToString(data);
+    }
+
+    private byte[] decode(String data) throws Exception {
         return Base64.getUrlDecoder().decode(data);
     }
 
     public void generateKeyPair() {
         try {
-            
+
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-            keyGen.initialize(2048);
+            keyGen.initialize(4096);
             KeyPair keys = keyGen.generateKeyPair();
             File privateKeyFile = new File(PATH_PRIVATE_KEY);
             File publicKeyFile = new File(PATH_PUBLIC_KEY);

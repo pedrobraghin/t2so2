@@ -21,7 +21,7 @@ public class Client implements Runnable {
     private String ip;
     private int port;
 
-    private PrintStream sentMessageToServer;
+    private PrintStream sendMessageToServer;
     private BufferedReader receiveMessageFromServer;
     private Stream stream;
     private RSA rsa;
@@ -42,7 +42,7 @@ public class Client implements Runnable {
             isConnected = true;
             client = new Socket(ip, port);
 
-            sentMessageToServer = new PrintStream(client.getOutputStream());
+            sendMessageToServer = new PrintStream(client.getOutputStream());
             receiveMessageFromServer = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             while (isConnected && (message = receiveMessageFromServer.readLine()) != null) {
@@ -70,8 +70,7 @@ public class Client implements Runnable {
 
     public void sendMessage(String message) {
         try {
-            String encryptedMessage = rsa.encrypt(message);
-            sentMessageToServer.println(encryptedMessage);
+            sendMessageToServer.println(rsa.encrypt(message));
             if( message.startsWith("/exit")) {
                 closeConnection();
             }
@@ -83,8 +82,8 @@ public class Client implements Runnable {
     public void closeConnection() {
         try {
             isConnected = false;
-            if (sentMessageToServer != null) {
-                sentMessageToServer.close();
+            if (sendMessageToServer != null) {
+                sendMessageToServer.close();
             }
             if (receiveMessageFromServer != null) {
                 receiveMessageFromServer.close();

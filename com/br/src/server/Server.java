@@ -178,7 +178,7 @@ public class Server implements Runnable {
             try {
                 sendMessageToClient("[Servidor] Informe um nickname para se conectar ao chat: ");
 
-                nickname = receiveMessageFromClient.readLine();
+                nickname = readMessage(receiveMessageFromClient.readLine());
                 isValidNickname = validateNickname(nickname, ID);
                 if (nickname.startsWith("/exit")) {
                     broadcast("[Servidor] " + nickname + " se desconectou.", ID);
@@ -188,7 +188,7 @@ public class Server implements Runnable {
                 while (!isValidNickname) {
                     sendMessageToClient("[Servidor] Este nickname já está em uso, escolha outra: ");
 
-                    nickname = receiveMessageFromClient.readLine();
+                    nickname = readMessage(receiveMessageFromClient.readLine());
                     isValidNickname = validateNickname(nickname, ID);
                 }
                 sendMessageToClient("[Servidor] Seja bem-vindo(a) ao Chat " + nickname);
