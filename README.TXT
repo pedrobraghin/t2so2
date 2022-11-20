@@ -33,3 +33,8 @@
         Main-Class: com.br.src.main.Main
 
     Caso não exista, crie uma nova linha exatamente idêntica a linha acima, salve o arquivo MANIFEST.MF. Salve o arquivo .jar e execute novamente.
+
+3. Altere o operador de referência de arquivos:
+    Alguns terminais de comando não idntificam o operador "@". Para resolver isso utilize o operador "$". Veja o exemplo:
+    
+        javac com/br/src/main/Main.java $classes.txt -d bin

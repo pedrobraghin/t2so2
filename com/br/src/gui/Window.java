@@ -193,7 +193,7 @@ public class Window extends JFrame {
         hosTextField.setPreferredSize(new Dimension(200, LINE_HEIGHT));
         hosTextField.setSize(new Dimension(200, LINE_HEIGHT));
 
-        portLabel = new JLabel("Port:");
+        portLabel = new JLabel("Porta:");
         portLabel.setPreferredSize(new Dimension(30, 10));
         portLabel.setSize(new Dimension(30, LINE_HEIGHT));
         portLabel.setHorizontalAlignment(SwingConstants.LEFT);

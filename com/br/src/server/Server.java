@@ -134,7 +134,7 @@ public class Server implements Runnable {
                             sendMessageToClient("[Servidor] Para enviar uma mensagem privada siga o seguinte formato: /private <nickname do receptor> <mensagem>.");
                         } else {
                             if (privateMessage[1].equals(nickname)) {
-                                sendMessageToClient("[Servidor] Não é possível enviar uma mensagem para você mesmo.");
+                                sendMessageToClient("[Servidor] Não é possível enviar uma mensagem privada para você mesmo.");
                             } else {
                                 isMessageSent = sendPrivateMessage(privateMessage[2], nickname, privateMessage[1]);
                                 if (isMessageSent) {
@@ -186,7 +186,7 @@ public class Server implements Runnable {
                     return;
                 }
                 while (!isValidNickname) {
-                    sendMessageToClient("[Servidor] Este nickname já está em uso, escolha outra: ");
+                    sendMessageToClient("[Servidor] Este nickname já está em uso, escolha outro: ");
 
                     nickname = readMessage(receiveMessageFromClient.readLine());
                     isValidNickname = validateNickname(nickname, ID);
@@ -244,7 +244,7 @@ public class Server implements Runnable {
         }
 
         private String formatPrivateMessage(String message, String nickname) {
-            String formatedMessage = DateTime.getDateTime() + "[Private message from: " + nickname + "]: " + message;
+            String formatedMessage = DateTime.getDateTime() + "[Mensagem privada de: " + nickname + "]: " + message;
             return formatedMessage;
         }
 
