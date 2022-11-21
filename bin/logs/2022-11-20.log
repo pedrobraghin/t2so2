@@ -1,0 +1,15 @@
+# Time of occurence: 21:51:55.196157500
+Error on Client Socket: Connection refused: connect
+
+# Time of occurence: 21:51:59.216352300
+Error while encrypting: .\keys\public.key
+
+# Time of occurence: 21:51:59.219362
+Error while decrypting: .\keys\private.key
+
+# Time of occurence: 21:51:59.222362
+Error while encrypting: .\keys\public.key
+
+# Time of occurence: 21:51:59.225883700
+Error while decrypting: .\keys\private.key
+
