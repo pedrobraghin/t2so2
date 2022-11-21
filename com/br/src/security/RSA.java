@@ -112,7 +112,7 @@ public class RSA {
         try {
 
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-            keyGen.initialize(4096);
+            keyGen.initialize(2048);
             KeyPair keys = keyGen.generateKeyPair();
             File privateKeyFile = new File(PATH_PRIVATE_KEY);
             File publicKeyFile = new File(PATH_PUBLIC_KEY);
